@@ -12,6 +12,7 @@ template<typename T> class Node {
 
     public:
         const T getValue(void) const noexcept;
+        
 
         Node* left;
         Node* right;
@@ -19,6 +20,31 @@ template<typename T> class Node {
 
 
         Node(void) = default;
-        Node(Node<T>&) = delete;
         Node(T);
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//CONSTRUCTOR
+template<typename T> Node<T>::Node(T value): value(value) {
+    this->height = 1;
+    this->left = nullptr;
+    this->right = nullptr;
+}
+
+
+//METHODS
+template<typename T> const T Node<T>::getValue() const noexcept {
+    return this->value;
+}
