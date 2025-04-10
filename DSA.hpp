@@ -19,7 +19,7 @@ namespace DSA {
                     T value;
             
                 public:
-                    const T getValue(void) const noexcept;
+                    T getValue(void) const noexcept;
                     void setValue(T);
                     
             
@@ -446,7 +446,7 @@ namespace DSA {
     
     //METHODS
     //returns the value of the node
-    template<typename T> const T AVLTree<T>::Node::getValue() const noexcept {
+    template<typename T> T AVLTree<T>::Node::getValue() const noexcept {
         return this->value;
     }
     
