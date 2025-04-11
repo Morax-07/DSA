@@ -2,6 +2,11 @@
 
 #include <iostream>
 #include <deque>
+#include <vector>
+#include <list>
+#include <array>
+#include <string>
+#include <optional>
 
 
 
@@ -36,7 +41,7 @@ namespace DSA {
 
 
     
-            AVLTree<T>::Node* root; 
+            Node* root; 
     
     
             Node* balanceNode(Node*);
@@ -56,15 +61,14 @@ namespace DSA {
         public:
             void inOrderTraversal(void);
             bool isBalanced(void);
-            void deleteNode(T);
-            void insertNode(T);
+            void remove(T);
+            void add(T);
             Node getRootCopy(void);
     
     
             AVLTree(void);
             ~AVLTree(void);
     };
-    
     
     
     
@@ -115,7 +119,7 @@ namespace DSA {
     }
     
     //it executes a left rotation on a node
-    template<typename T> AVLTree<T>::Node* AVLTree<T>::rotateLeft(Node* node) {
+    template<typename T> typename AVLTree<T>::Node* AVLTree<T>::rotateLeft(Node* node) {
         Node* x = node->right;
         Node* t = x->left;
         x->left = node;
@@ -131,7 +135,7 @@ namespace DSA {
     }
     
     //it executes a right rotation on a node
-    template<typename T> AVLTree<T>::Node* AVLTree<T>::rotateRight(Node* node) {
+    template<typename T> typename AVLTree<T>::Node* AVLTree<T>::rotateRight(Node* node) {
         Node* x = node->left;
         Node* t = x->right;
         x->right = node;
@@ -147,7 +151,7 @@ namespace DSA {
     }
     
     //checks the balanc factor of a node to either rotate it left, or rotate it right or leave it untouched
-    template<typename T> AVLTree<T>::Node* AVLTree<T>::balanceNode(Node* node) {
+    template<typename T> typename AVLTree<T>::Node* AVLTree<T>::balanceNode(Node* node) {
         int BF = getNodeBalance(node);
     
         
@@ -185,7 +189,7 @@ namespace DSA {
     }
     
     //inserts a node inside the tree
-    template<typename T> void AVLTree<T>::insertNode(T value) {
+    template<typename T> void AVLTree<T>::add(T value) {
         //if root node isn't instantiated it instantiates it
         if(!root) {
             root = new Node(value);
@@ -287,7 +291,7 @@ namespace DSA {
     }
     
     //deletes a node of the tree
-    template<typename T> void AVLTree<T>::deleteNode(T value) {
+    template<typename T> void AVLTree<T>::remove(T value) {
         Node* node = root;
         Node* parent = nullptr;
         std::deque<Node*> traversedNodes;
@@ -420,7 +424,7 @@ namespace DSA {
     }
     
     //return a copy of the root node or throws a runtime_error if the root is nullptr
-    template<typename T> AVLTree<T>::Node AVLTree<T>::getRootCopy() {
+    template<typename T> typename AVLTree<T>::Node AVLTree<T>::getRootCopy() {
         if(!root)
             throw std::runtime_error("The root node has not been instantiated yed!");
     
@@ -457,12 +461,324 @@ namespace DSA {
         }
         catch(...) {
             try {
-                std::cout<< "An error occurred while trying to assign the value of " << value << " to Node<T>::value.\n";
-                std::cout<< "The value of Node<T>::value remains unchanged (Node<T>::value = " << this->value << ")."; 
+                std::cout<< "An error occurred while trying to assign the value of " << value << " to AVLTree<T>::Node::value.\n";
+                std::cout<< "The value of AVLTree<T>::Node::value remains unchanged (AVLTree<T>::Node::value = " << this->value << ")."; 
             }
             catch (...) {
-                std::cout<< "Cannot assign the value to Node<T>::value or print out the value you're trying to assign and the value of Node<T>::value.";
+                std::cout<< "Cannot assign the value to AVLTree<T>::Node::value or print out the value you're trying to assign and the value of AVLTree<T>::Node::value.";
             }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //Pair<T> class definition
+    //this class is used inside the class HashMap<T> and HashMap<T>::Bucket in which it rappresents
+    //a key associated with a value
+    template<typename T> class Pair {
+        private:
+            const std::string key;
+            T value;
+
+
+        public:
+            const std::string getKey(void) const noexcept;
+            T& getValue(void) noexcept;
+            void setValue(T);
+            std::string toString();
+
+
+            Pair();
+            Pair(std::string, T);
+    };
+
+
+    //HashMap<T> class definition
+    template<typename T> class HashMap {
+        private:
+            //private inner class Bucket that can only be used inside HashMap<T> class
+            class Bucket {
+                private:
+                    std::list<Pair<T>> bucket;
+
+
+                public:
+                    void add(Pair<T>&);
+                    void remove(std::string&);
+                    T& operator[](std::string&);
+                    bool exist(std::string&);
+                    std::string toString();
+
+
+                    Bucket(void);
+            };
+
+
+
+
+
+
+            std::vector<Bucket> hashTable;
+            const int maxElementNumber;
+
+
+            int calculateHashValue(const std::string&);
+
+        
+        public:
+            void add(Pair<T>);
+            void remove(std::string);
+            T& operator[](std::string);
+            bool exist(std::string);
+            std::string toString(void);
+
+
+
+            HashMap(int);
+            HashMap(void);
+            HashMap(HashMap&) = delete;
+            HashMap(HashMap&&) = delete;
+    };
+
+
+
+
+
+
+    //HASHMAP
+    //CONSTRUCTOR
+    template<typename T> HashMap<T>::HashMap(int maxElementNumber): maxElementNumber(maxElementNumber) {
+        hashTable = std::vector<Bucket>(maxElementNumber);
+
+        for(int i = 0; i < maxElementNumber; i++) hashTable[i] = Bucket();
+    }
+    
+    //CONSTRUCTOR
+    template<typename T> HashMap<T>::HashMap(): maxElementNumber(100) {
+        hashTable = std::vector<Bucket>(maxElementNumber);
+
+        for(int i = 0; i < 100; i++) hashTable[i] = Bucket();
+    }
+
+
+
+
+    //METHODS
+    //it calculates the hash value of the string passed by argument
+    template<typename T> int HashMap<T>::calculateHashValue(const std::string& key) {
+        int sum;
+
+        for(char character : key) sum += (int)character;
+        
+        
+        return sum % maxElementNumber;
+    }
+
+    //adds a Pair to the hash map
+    template<typename T> void HashMap<T>::add(Pair<T> pair) {
+        const int hashValue = calculateHashValue(pair.getKey());
+
+        hashTable[hashValue].add(pair);        
+    } 
+
+    //removes a Pair from the hash map
+    template<typename T> void HashMap<T>::remove(std::string key) {
+        const int hashValue = calculateHashValue(key);
+
+        hashTable[hashValue].remove(key);
+    }
+
+    //returns a modifiable reference to the value associated with the specified key
+    template<typename T> T& HashMap<T>::operator[](std::string key) {
+        const int hashValue = calculateHashValue(key);
+
+        return hashTable[hashValue][key];
+    }
+
+    //checks if a key exist in the hash map
+    template<typename T> bool HashMap<T>::exist(std::string key) {
+        const int hashValue = calculateHashValue(key);
+
+        return hashTable[hashValue].exist(key);
+    }
+
+    //returns the std::string rappresenting the hash map
+    template<typename T> std::string HashMap<T>::toString() {
+        std::string stringFormat = "{\n";
+
+        for(auto& bucket : hashTable) stringFormat += bucket.toString();
+        
+
+        stringFormat += "}\n";
+
+        return stringFormat;
+    }
+
+
+
+
+
+
+
+
+
+
+    //BUCKET
+    //CONSTRUCTOR
+    template<typename T> HashMap<T>::Bucket::Bucket(): bucket() {}
+
+
+
+
+    //METHODS
+    //add a Pair<T> into a Bucket
+    template<typename T> void HashMap<T>::Bucket::add(Pair<T>& pair) {
+        if(bucket.size() != 0) {
+            for(auto& p : bucket) {
+                if(pair.getKey() == p.getKey()) throw std::runtime_error("A pair with the key \"" + pair.getKey() + "\" already exist!");
+            }
+        }
+
+
+        bucket.push_back(pair);
+    }
+
+    //removes a pair from the bucket
+    template<typename T> void HashMap<T>::Bucket::remove(std::string& key) {
+        if(bucket.size() == 0) throw std::runtime_error("The Pair<T> you're trying to remove doesn't exist!");
+
+        auto it = bucket.begin();
+
+        while(it != bucket.end()) {
+            if(it->getKey() == key) {
+                bucket.erase(it);
+                return;
+            }
+            else {
+                ++it;
+            } 
+        }
+        
+        
+        throw std::runtime_error("The Pair<T> you're trying to remove doesn't exist!");
+    }
+
+    //returns a modifiable reference to the value associated with the specified key found in the bucket
+    template<typename T> T& HashMap<T>::Bucket::operator[](std::string& key) {
+        if(bucket.size() == 0) throw std::runtime_error("There is no value associated with the key \"" + key + "\" in the HashMap<T>!");
+
+
+        for(auto& pair : bucket) {
+            if(pair.getKey() == key) return pair.getValue();
+        }
+
+        throw std::runtime_error("There is no value associated with the key \"" + key + "\" in the HashMap<T>!");
+    }
+
+    //checks if a key exist inside a bucket
+    template<typename T> bool HashMap<T>::Bucket::exist(std::string& key) {
+        if(bucket.size() == 0) return false;
+
+
+        for(auto& pair : bucket) {
+            if(pair.getKey() == key) return true;
+        }
+
+        return false;
+    }
+
+    //returns the string rappresenting the bucket
+    template<typename T> std::string HashMap<T>::Bucket::toString() {
+        if(bucket.size() == 0) return "";
+
+
+        std::string stringFormat = "";
+
+        for(auto& pair : bucket) stringFormat += pair.toString();
+
+        return stringFormat;
+    }
+
+
+
+
+
+
+
+
+
+
+
+    //PAIR
+    //CONSTRUCTOR
+    template<typename T> Pair<T>::Pair(std::string key, T value): key(key) {
+        this->value = value;
+    }
+
+    //CONSTRUCTOR
+    template<typename T> Pair<T>::Pair(): key("_") {
+        this->value = NULL;
+    }
+
+
+
+
+    //METHODS
+    //it returns the key of a Pair
+    template<typename T> const std::string Pair<T>::getKey() const noexcept {
+        return this->key;
+    }
+
+    //it returns the value of a Pair
+    template<typename T> T& Pair<T>::getValue() noexcept {
+        return this->value;
+    }
+
+    //it sets the value of a Pair
+    template<typename T> void Pair<T>::setValue(T value) {
+        try {
+            this->value = value;
+        }
+        catch(...) {
+            try {
+                std::cout<< "An error occurred while trying to assign the value of " << value << " to HashMap<T>::Bucket::Pair::value.\n";
+                std::cout<< "The value of HashMap<T>::Bucket::Pair::value remains unchanged (HashMap<T>::Bucket::Pair::value = " << this->value << ")."; 
+            }
+            catch(...) {
+                std::cout<< "Cannot assign the value to HashMap<T>::Bucket::Pair::value or print out the value you're trying to assign and the value of HashMap<T>::Bucket::Pair::value.";
+            }
+        }
+    }
+
+    //returns the string rappresenting a pair
+    template<typename T> std::string Pair<T>::toString() {
+        try {
+            return "\t{\"" + this->key + "\": " + std::to_string(this->value) + "}\n";
+        }
+        catch(...) {
+            return "It's impossible to display a string format of this HashMap<T> because of the type of it's value";
         }
     }
 }
