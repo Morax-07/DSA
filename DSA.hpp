@@ -15,6 +15,7 @@
 
 
 namespace DSA {
+    #pragma region AVLTREE
     //AVLTree<T> class definition
     template<typename T> class AVLTree {
         private:
@@ -472,28 +473,9 @@ namespace DSA {
 
 
 
+    #pragma endregion
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    #pragma region HASHMAP
     //Pair<T> class definition
     //this class is used inside the class HashMap<T> and HashMap<T>::Bucket in which it rappresents
     //a key associated with a value
@@ -529,7 +511,8 @@ namespace DSA {
                     void remove(std::string&);
                     T& operator[](std::string&);
                     bool exist(std::string&);
-                    std::string toString();
+                    std::string toString(void);
+                    std::vector<Pair<T>*> getPairs(void);
 
 
                     Bucket(void);
@@ -541,6 +524,7 @@ namespace DSA {
 
 
             std::vector<Bucket> hashTable;
+            std::list<std::string> hashMapKeys;
             const int maxElementNumber;
 
 
@@ -553,6 +537,8 @@ namespace DSA {
             T& operator[](std::string);
             bool exist(std::string);
             std::string toString(void);
+            std::vector<std::string> getKeys(void);
+            std::vector<Pair<T>*> getPairs(void);
 
 
 
@@ -600,7 +586,8 @@ namespace DSA {
     template<typename T> void HashMap<T>::add(Pair<T> pair) {
         const int hashValue = calculateHashValue(pair.getKey());
 
-        hashTable[hashValue].add(pair);        
+        hashTable[hashValue].add(pair);  
+        hashMapKeys.push_back(pair.getKey());      
     } 
 
     //removes a Pair from the hash map
@@ -608,6 +595,19 @@ namespace DSA {
         const int hashValue = calculateHashValue(key);
 
         hashTable[hashValue].remove(key);
+
+
+        auto it = hashMapKeys.begin();
+
+        while(it != hashMapKeys.end()) {
+            if(*it == key) {
+                hashMapKeys.erase(it);
+                return;
+            }
+            else {
+                ++it;
+            }
+        }
     }
 
     //returns a modifiable reference to the value associated with the specified key
@@ -636,6 +636,32 @@ namespace DSA {
         return stringFormat;
     }
 
+    //returns a vector of the keys of the hash map
+    template<typename T> std::vector<std::string> HashMap<T>::getKeys() {
+        std::vector<std::string> keysVector;
+
+        for(std::string key : hashMapKeys) {
+            keysVector.push_back(key);
+        }
+
+
+
+        return keysVector;
+    }
+
+    //returns the reference of all the pairs in the hash map
+    template<typename T> std::vector<Pair<T>*> HashMap<T>::getPairs() {
+        std::vector<Pair<T>*> pairs;
+
+
+        for(auto& bucket : hashTable) {
+            std::vector<Pair<T>*> bucketPairs = bucket.getPairs();
+            pairs.insert(pairs.end(), bucketPairs.begin(), bucketPairs.end());
+        }
+
+
+        return pairs;
+    }
 
 
 
@@ -721,7 +747,15 @@ namespace DSA {
         return stringFormat;
     }
 
+    //returns the reference of all the pairs in the bucket
+    template<typename T> std::vector<Pair<T>*> HashMap<T>::Bucket::getPairs() {
+        std::vector<Pair<T>*> pairs;
 
+        for(auto& pair : bucket) pairs.push_back(&pair);
+
+
+        return pairs;
+    }
 
 
 
@@ -781,4 +815,8 @@ namespace DSA {
             return "It's impossible to display a string format of this HashMap<T> because of the type of it's value";
         }
     }
+    
+    
+    
+    #pragma endregion
 }
