@@ -3,7 +3,6 @@
 #include <iostream>
 #include <deque>
 #include <vector>
-#include <list>
 #include <string>
 
 
@@ -505,363 +504,12 @@ namespace DSA {
             this->value = value;
         }
         catch(...) {
-            try {
-                std::cout<< "An error occurred while trying to assign the value of " << value << " to AVLTree<T>::Node::value.\n";
-                std::cout<< "The value of AVLTree<T>::Node::value remains unchanged (AVLTree<T>::Node::value = " << this->value << ")."; 
-            }
-            catch (...) {
-                std::cout<< "Cannot assign the value to AVLTree<T>::Node::value or print out the value you're trying to assign and the value of AVLTree<T>::Node::value.";
-            }
+            std::cout<< "Cannot assign the value to AVLTree<T>::Node::value or print out the value you're trying to assign and the value of AVLTree<T>::Node::value.";
         }
     }
 
 
 
-    #pragma endregion
-
-    #pragma region HASHMAP
-    //Pair<T> class definition
-    //this class is used inside the class HashMap<T> and HashMap<T>::Bucket in which it rappresents
-    //a key associated with a value
-    template<typename T> class Pair final {
-        private:
-            const std::string key;
-            T value;
-
-
-        public:
-            const std::string getKey(void) const noexcept;
-            T& getValue(void) noexcept;
-            void setValue(T);
-            std::string toString();
-
-
-            Pair();
-            Pair(std::string, T);
-    };
-
-
-    //HashMap<T> class definition
-    template<typename T> class HashMap final {
-        private:
-            //private inner class Bucket that can only be used inside HashMap<T> class
-            class Bucket final {
-                private:
-                    std::list<Pair<T>> bucket;
-
-
-                public:
-                    void add(Pair<T>&);
-                    void remove(std::string&);
-                    T& operator[](std::string&);
-                    bool exist(std::string&);
-                    std::string toString(void);
-                    std::vector<Pair<T>*> getPairs(void);
-
-
-                    Bucket(void);
-            };
-
-
-
-
-
-
-            std::vector<Bucket> hashTable;
-            std::list<std::string> hashMapKeys;
-            const int maxElementNumber;
-
-
-            int calculateHashValue(const std::string&);
-
-        
-        public:
-            void add(Pair<T>);
-            void remove(std::string);
-            T& operator[](std::string);
-            bool exist(std::string);
-            std::string toString(void);
-            std::vector<std::string> getKeys(void);
-            std::vector<Pair<T>*> getPairs(void);
-
-
-
-            HashMap(int);
-            HashMap(void);
-            HashMap(HashMap&) = delete;
-            HashMap(HashMap&&) = delete;
-    };
-
-
-
-
-
-
-    //HASHMAP
-    //CONSTRUCTOR
-    template<typename T> HashMap<T>::HashMap(int maxElementNumber): maxElementNumber(maxElementNumber) {
-        hashTable = std::vector<Bucket>(maxElementNumber);
-
-        for(int i = 0; i < maxElementNumber; i++) hashTable[i] = Bucket();
-    }
-    
-    //CONSTRUCTOR
-    template<typename T> HashMap<T>::HashMap(): maxElementNumber(100) {
-        hashTable = std::vector<Bucket>(maxElementNumber);
-
-        for(int i = 0; i < 100; i++) hashTable[i] = Bucket();
-    }
-
-
-
-
-    //METHODS
-    //it calculates the hash value of the string passed by argument
-    template<typename T> int HashMap<T>::calculateHashValue(const std::string& key) {
-        int sum;
-
-        for(char character : key) sum += (int)character;
-        
-        
-        return sum % maxElementNumber;
-    }
-
-    //adds a Pair to the hash map
-    template<typename T> void HashMap<T>::add(Pair<T> pair) {
-        const int hashValue = calculateHashValue(pair.getKey());
-
-        hashTable[hashValue].add(pair);  
-        hashMapKeys.push_back(pair.getKey());      
-    } 
-
-    //removes a Pair from the hash map
-    template<typename T> void HashMap<T>::remove(std::string key) {
-        const int hashValue = calculateHashValue(key);
-
-        hashTable[hashValue].remove(key);
-
-
-        auto it = hashMapKeys.begin();
-
-        while(it != hashMapKeys.end()) {
-            if(*it == key) {
-                hashMapKeys.erase(it);
-                return;
-            }
-            else {
-                ++it;
-            }
-        }
-    }
-
-    //returns a modifiable reference to the value associated with the specified key
-    template<typename T> T& HashMap<T>::operator[](std::string key) {
-        const int hashValue = calculateHashValue(key);
-
-        return hashTable[hashValue][key];
-    }
-
-    //checks if a key exist in the hash map
-    template<typename T> bool HashMap<T>::exist(std::string key) {
-        const int hashValue = calculateHashValue(key);
-
-        return hashTable[hashValue].exist(key);
-    }
-
-    //returns the std::string represents the hash map
-    template<typename T> std::string HashMap<T>::toString() {
-        std::string stringFormat = "{\n";
-
-        for(auto& bucket : hashTable) stringFormat += bucket.toString();
-        
-
-        stringFormat += "}\n";
-
-        return stringFormat;
-    }
-
-    //returns a vector of the keys of the hash map
-    template<typename T> std::vector<std::string> HashMap<T>::getKeys() {
-        std::vector<std::string> keysVector;
-
-        for(std::string key : hashMapKeys) {
-            keysVector.push_back(key);
-        }
-
-
-
-        return keysVector;
-    }
-
-    //returns the reference of all the pairs in the hash map
-    template<typename T> std::vector<Pair<T>*> HashMap<T>::getPairs() {
-        std::vector<Pair<T>*> pairs;
-
-
-        for(auto& bucket : hashTable) {
-            std::vector<Pair<T>*> bucketPairs = bucket.getPairs();
-            pairs.insert(pairs.end(), bucketPairs.begin(), bucketPairs.end());
-        }
-
-
-        return pairs;
-    }
-
-
-
-
-
-
-
-
-
-    //BUCKET
-    //CONSTRUCTOR
-    template<typename T> HashMap<T>::Bucket::Bucket(): bucket() {}
-
-
-
-
-    //METHODS
-    //add a Pair<T> into a Bucket
-    template<typename T> void HashMap<T>::Bucket::add(Pair<T>& pair) {
-        if(bucket.size() != 0) {
-            for(auto& p : bucket) {
-                if(pair.getKey() == p.getKey()) throw std::runtime_error("A pair with the key \"" + pair.getKey() + "\" already exist!");
-            }
-        }
-
-
-        bucket.push_back(pair);
-    }
-
-    //removes a pair from the bucket
-    template<typename T> void HashMap<T>::Bucket::remove(std::string& key) {
-        if(bucket.size() == 0) throw std::runtime_error("The Pair<T> you're trying to remove doesn't exist!");
-
-        auto it = bucket.begin();
-
-        while(it != bucket.end()) {
-            if(it->getKey() == key) {
-                bucket.erase(it);
-                return;
-            }
-            else {
-                ++it;
-            } 
-        }
-        
-        
-        throw std::runtime_error("The Pair<T> you're trying to remove doesn't exist!");
-    }
-
-    //returns a modifiable reference to the value associated with the specified key found in the bucket
-    template<typename T> T& HashMap<T>::Bucket::operator[](std::string& key) {
-        if(bucket.size() == 0) throw std::runtime_error("There is no value associated with the key \"" + key + "\" in the HashMap<T>!");
-
-
-        for(auto& pair : bucket) {
-            if(pair.getKey() == key) return pair.getValue();
-        }
-
-        throw std::runtime_error("There is no value associated with the key \"" + key + "\" in the HashMap<T>!");
-    }
-
-    //checks if a key exist inside a bucket
-    template<typename T> bool HashMap<T>::Bucket::exist(std::string& key) {
-        if(bucket.size() == 0) return false;
-
-
-        for(auto& pair : bucket) {
-            if(pair.getKey() == key) return true;
-        }
-
-        return false;
-    }
-
-    //returns the string rappresenting the bucket
-    template<typename T> std::string HashMap<T>::Bucket::toString() {
-        if(bucket.size() == 0) return "";
-
-
-        std::string stringFormat = "";
-
-        for(auto& pair : bucket) stringFormat += pair.toString();
-
-        return stringFormat;
-    }
-
-    //returns the reference of all the pairs in the bucket
-    template<typename T> std::vector<Pair<T>*> HashMap<T>::Bucket::getPairs() {
-        std::vector<Pair<T>*> pairs;
-
-        for(auto& pair : bucket) pairs.push_back(&pair);
-
-
-        return pairs;
-    }
-
-
-
-
-
-
-
-
-
-    //PAIR
-    //CONSTRUCTOR
-    template<typename T> Pair<T>::Pair(std::string key, T value): key(key) {
-        setValue(value);
-    }
-
-    //CONSTRUCTOR
-    template<typename T> Pair<T>::Pair(): key("_") {
-        this->value = NULL;
-    }
-
-
-
-
-    //METHODS
-    //it returns the key of a Pair
-    template<typename T> const std::string Pair<T>::getKey() const noexcept {
-        return this->key;
-    }
-
-    //it returns the value of a Pair
-    template<typename T> T& Pair<T>::getValue() noexcept {
-        return this->value;
-    }
-
-    //it sets the value of a Pair
-    template<typename T> void Pair<T>::setValue(T value) {
-        try {
-            this->value = value;
-        }
-        catch(...) {
-            try {
-                std::cout<< "An error occurred while trying to assign the value of " << value << " to Pair<T>::value.\n";
-                std::cout<< "The value of Pair<T>::value remains unchanged (Pair<T>::value = " << this->value << ")."; 
-            }
-            catch(...) {
-                std::cout<< "Cannot assign the value to Pair<T>::value or print out the value you're trying to assign and the value of Pair<T>::value.";
-            }
-        }
-    }
-
-    //returns the string rappresenting a pair
-    template<typename T> std::string Pair<T>::toString() {
-        try {
-            return "\t{\"" + this->key + "\": " + std::to_string(this->value) + "}\n";
-        }
-        catch(...) {
-            return "It's impossible to display a string format of this HashMap<T> because of the type of it's value";
-        }
-    }
-    
-    
-    
     #pragma endregion
 
     #pragma region LINKEDLIST
@@ -903,8 +551,6 @@ namespace DSA {
             
 
             List(void);
-            List(List<T>&) = delete;
-            List(List<T>&&) = delete;
     };
 
 
@@ -1131,7 +777,7 @@ namespace DSA {
         else {
             for(int i = 0; i > index + 1; i--) parent = parent->prev;
 
-            if(parent->prev == head) goto indexIsEqualToZero;
+            if(parent->prev == head) goto removeIndexIsEqualToZero;
 
 
 
@@ -1182,11 +828,7 @@ namespace DSA {
 
     //NODE
     //CONSTRUCTOR
-    template<typename T> List<T>::Node::Node(T value) {
-        setValue(value);
-        this->prev = nullptr;
-        this->next = nullptr;
-    }
+    template<typename T> List<T>::Node::Node(T value): value(value) {}
 
 
 
@@ -1200,13 +842,7 @@ namespace DSA {
             this->value = value;
         }
         catch(...) {
-            try {
-                std::cout<< "An error occurred while trying to assign the value of " << value << " to List<T>::Node::value.\n";
-                std::cout<< "The value of List<T>::Node::value remains unchanged (List<T>::Node::value = " << this->value << ")."; 
-            }
-            catch(...) {
-                std::cout<< "Cannot assign the value to List<T>::Node::value or print out the value you're trying to assign and the value of List<T>::Node::value.";
-            }
+            std::cout<< "Cannot assign the value to List<T>::Node::value or print out the value you're trying to assign and the value of List<T>::Node::value.";
         }    
     }
 
@@ -1219,5 +855,325 @@ namespace DSA {
 
 
 
+    #pragma endregion
+
+    #pragma region HASHMAP
+    //Pair<T> class definition
+    //this class is used inside the class HashMap<T> and HashMap<T>::Bucket in which it rappresents
+    //a key associated with a value
+    template<typename T> class Pair final {
+        private:
+            const std::string key;
+            T value;
+
+
+        public:
+            const std::string getKey(void) const noexcept;
+            T& getValue(void) noexcept;
+            void setValue(T);
+            std::string toString();
+
+
+            Pair(void) = delete;
+            Pair(std::string, T);
+    };
+
+
+    //HashMap<T> class definition
+    template<typename T> class HashMap final {
+        private:
+            //private inner class Bucket that can only be used inside HashMap<T> class
+            class Bucket final {
+                private:
+                    List<Pair<T>> bucket;
+
+
+                public:
+                    void add(Pair<T>&);
+                    void remove(std::string&);
+                    T& operator[](std::string&);
+                    bool exist(std::string&);
+                    std::string toString(void);
+                    std::vector<Pair<T>*> getPairs(void);
+
+
+                    Bucket(void);
+            };
+
+
+
+
+
+
+            std::vector<Bucket> hashTable;
+            List<std::string> hashMapKeys;
+            const int maxElementNumber;
+
+
+            int calculateHashValue(const std::string&);
+
+        
+        public:
+            void add(Pair<T>);
+            void remove(std::string);
+            T& operator[](std::string);
+            bool exist(std::string);
+            std::string toString(void);
+            std::vector<std::string> getKeys(void);
+            std::vector<Pair<T>*> getPairs(void);
+
+
+
+            HashMap(int);
+            HashMap(void);
+    };
+
+
+
+
+
+
+    //HASHMAP
+    //CONSTRUCTOR
+    template<typename T> HashMap<T>::HashMap(int maxElementNumber): maxElementNumber(maxElementNumber) {
+        hashTable = std::vector<Bucket>(maxElementNumber);
+
+        for(int i = 0; i < maxElementNumber; i++) hashTable[i] = Bucket();
+    }
+    
+    //CONSTRUCTOR
+    template<typename T> HashMap<T>::HashMap(): maxElementNumber(100) {
+        hashTable = std::vector<Bucket>(maxElementNumber);
+
+        for(int i = 0; i < maxElementNumber; i++) hashTable[i] = Bucket();
+    }
+
+
+
+
+    //METHODS
+    //it calculates the hash value of the string passed by argument
+    template<typename T> int HashMap<T>::calculateHashValue(const std::string& key) {
+        int sum = 0;
+
+        for(char character : key) sum += (int)character;
+        
+        
+        return sum % maxElementNumber;
+    }
+
+    //adds a Pair to the hash map
+    template<typename T> void HashMap<T>::add(Pair<T> pair) {
+        const int hashValue = calculateHashValue(pair.getKey());
+
+        hashTable[hashValue].add(pair);  
+        hashMapKeys.add(pair.getKey());      
+    } 
+
+    //removes a Pair from the hash map
+    template<typename T> void HashMap<T>::remove(std::string key) {
+        const int hashValue = calculateHashValue(key);
+
+        hashTable[hashValue].remove(key);
+
+
+        for(int i = 0; i < hashMapKeys.getLength(); i++) {
+            if(hashMapKeys[i] == key) {
+                hashMapKeys.remove(i);
+                return;
+            }
+        }
+    }
+
+    //returns a modifiable reference to the value associated with the specified key
+    template<typename T> T& HashMap<T>::operator[](std::string key) {
+        const int hashValue = calculateHashValue(key);
+
+        return hashTable[hashValue][key];
+    }
+
+    //checks if a key exist in the hash map
+    template<typename T> bool HashMap<T>::exist(std::string key) {
+        const int hashValue = calculateHashValue(key);
+
+        return hashTable[hashValue].exist(key);
+    }
+
+    //returns the std::string represents the hash map
+    template<typename T> std::string HashMap<T>::toString() {
+        std::string stringFormat = "{\n";
+
+        for(auto& bucket : hashTable) stringFormat += bucket.toString();
+        
+
+        stringFormat += "}\n";
+
+        return stringFormat;
+    }
+
+    //returns a vector of the keys of the hash map
+    template<typename T> std::vector<std::string> HashMap<T>::getKeys() {
+        std::vector<std::string> keysVector;
+
+        for(int i = 0; i < hashMapKeys.getLength(); i++) {
+            keysVector.push_back(hashMapKeys[i]);
+        }
+
+
+
+        return keysVector;
+    }
+
+    //returns the reference of all the pairs in the hash map
+    template<typename T> std::vector<Pair<T>*> HashMap<T>::getPairs() {
+        std::vector<Pair<T>*> pairs;
+
+
+        for(auto& bucket : hashTable) {
+            std::vector<Pair<T>*> bucketPairs = bucket.getPairs();
+            pairs.insert(pairs.end(), bucketPairs.begin(), bucketPairs.end());
+        }
+
+
+        return pairs;
+    }
+
+
+
+
+
+
+
+
+
+    //BUCKET
+    //CONSTRUCTOR
+    template<typename T> HashMap<T>::Bucket::Bucket(): bucket() {}
+
+
+
+
+    //METHODS
+    //add a Pair<T> into a Bucket
+    template<typename T> void HashMap<T>::Bucket::add(Pair<T>& pair) {
+        if(bucket.getLength() != 0) {
+            for(int i = 0; i < bucket.getLength(); i++) {
+                if(pair.getKey() == bucket[i].getKey()) throw std::runtime_error("A pair with the key \"" + pair.getKey() + "\" already exist!");
+            }
+        }
+
+
+        bucket.add(pair);
+    }
+
+    //removes a pair from the bucket
+    template<typename T> void HashMap<T>::Bucket::remove(std::string& key) {
+        if(bucket.getLength() == 0) throw std::runtime_error("The Pair<T> you're trying to remove doesn't exist!");
+
+
+        for(int i = 0; i < bucket.getLength(); i++) {
+            if(bucket[i].getKey() == key) {
+                bucket.remove(i);
+                return;
+            }
+        }
+                
+        throw std::runtime_error("The Pair<T> you're trying to remove doesn't exist!");
+    }
+
+    //returns a modifiable reference to the value associated with the specified key found in the bucket
+    template<typename T> T& HashMap<T>::Bucket::operator[](std::string& key) {
+        if(bucket.getLength() == 0) throw std::runtime_error("There is no value associated with the key \"" + key + "\" in the HashMap<T>!");
+
+
+        for(int i = 0; i < bucket.getLength(); i++) {
+            if(bucket[i].getKey() == key) return bucket[i].getValue();
+        }
+
+        throw std::runtime_error("There is no value associated with the key \"" + key + "\" in the HashMap<T>!");
+    }
+
+    //checks if a key exist inside a bucket
+    template<typename T> bool HashMap<T>::Bucket::exist(std::string& key) {
+        if(bucket.getLength() == 0) return false;
+
+
+        for(int i = 0; i < bucket.getLength(); i++) {
+            if(bucket[i].getKey() == key) return true;
+        }
+
+        return false;
+    }
+
+    //returns the string rappresenting the bucket
+    template<typename T> std::string HashMap<T>::Bucket::toString() {
+        if(bucket.getLength() == 0) return "";
+
+
+        std::string stringFormat = "";
+
+        for(int i = 0; i < bucket.getLength(); i++) stringFormat += bucket[i].toString();
+
+        return stringFormat;
+    }
+
+    //returns the reference of all the pairs in the bucket
+    template<typename T> std::vector<Pair<T>*> HashMap<T>::Bucket::getPairs() {
+        std::vector<Pair<T>*> pairs;
+
+        for(int i = 0; i < bucket.getLength(); i++) pairs.push_back(&bucket[i]);
+
+
+        return pairs;
+    }
+
+
+
+
+
+
+
+
+
+    //PAIR
+    //CONSTRUCTOR
+    template<typename T> Pair<T>::Pair(std::string key, T value): key(key) {
+        setValue(value);
+    }
+
+
+
+
+    //METHODS
+    //it returns the key of a Pair
+    template<typename T> const std::string Pair<T>::getKey() const noexcept {
+        return this->key;
+    }
+
+    //it returns the value of a Pair
+    template<typename T> T& Pair<T>::getValue() noexcept {
+        return this->value;
+    }
+
+    //it sets the value of a Pair
+    template<typename T> void Pair<T>::setValue(T value) {
+        try {
+            this->value = value;
+        }
+        catch(...) {
+            std::cout<< "Cannot assign the value to Pair<T>::value or print out the value you're trying to assign and the value of Pair<T>::value.";
+        }
+    }
+
+    //returns the string rappresenting a pair
+    template<typename T> std::string Pair<T>::toString() {
+        try {
+            return "\t{\"" + this->key + "\": " + std::to_string(this->value) + "}\n";
+        }
+        catch(...) {
+            return "It's impossible to display a string format of this HashMap<T> because of the type of it's value";
+        }
+    }
+    
     #pragma endregion
 }
