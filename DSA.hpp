@@ -4,9 +4,7 @@
 #include <deque>
 #include <vector>
 #include <list>
-#include <array>
 #include <string>
-#include <optional>
 
 
 
@@ -15,12 +13,19 @@
 
 
 namespace DSA {
+    namespace Modality {
+        enum Verse {forwords, backwards};
+        enum Traverse {inOrder, preOrder, postOrder};
+    }
+
+
+
     #pragma region AVLTREE
     //AVLTree<T> class definition
-    template<typename T> class AVLTree {
+    template<typename T> class AVLTree final {
         private:
             //Inner class node to prevent the creation of other nodes outside a tree
-            class Node {
+            class Node final {
                 private:
                     T value;
             
@@ -54,13 +59,16 @@ namespace DSA {
             void updateNodeHeight(Node*);
             int getNodeHeight(Node*);
             void inOrderTraversal(Node*);
+            void preOrderTraversal(Node*);
+            void postOrderTraversal(Node*);
             bool isBalanced(Node*);
             void replaceNode(Node*, Node*, Node*);
             void deleteNodes(Node*);
     
         
         public:
-            void inOrderTraversal(void);
+            void traverse(Modality::Traverse);
+            void traverse(void);
             bool isBalanced(void);
             void remove(T);
             void add(T);
@@ -174,8 +182,24 @@ namespace DSA {
         return node;
     }
     
-    //public method to execute an in-order traversal in the tree starting from root node
-    template<typename T> void AVLTree<T>::inOrderTraversal() {
+    //public method to execute a traversal with the specified modality from root node
+    template<typename T> void AVLTree<T>::traverse(Modality::Traverse traverse) {
+        switch(traverse) {
+            case Modality::Traverse::inOrder:
+                inOrderTraversal(root);
+                break;
+
+            case Modality::Traverse::preOrder:
+                preOrderTraversal(root);
+                break;
+
+            case Modality::Traverse::postOrder:
+                postOrderTraversal(root);
+        }
+    }
+
+    //public method to execute an in-order traversal from root node
+    template<typename T> void AVLTree<T>::traverse() {
         inOrderTraversal(root);
     }
     
@@ -185,10 +209,30 @@ namespace DSA {
     
     
         inOrderTraversal(node->left);
-        std::cout<< node->getValue() << " ";
+        std::cout<< node->getValue() << ", ";
         inOrderTraversal(node->right);
     }
     
+    //executes a recursive pre-order traversal in the tree starting from a node
+    template<typename T> void AVLTree<T>::preOrderTraversal(Node* node) {
+        if(!node) return;
+
+
+        std::cout<< node->getValue() << ", ";
+        preOrderTraversal(node->left);
+        preOrderTraversal(node->right);
+    }
+
+    //executes a recursive post-order traversal in the tree starting from a node
+    template<typename T> void AVLTree<T>::postOrderTraversal(Node* node) {
+        if(!node) return;
+
+
+        postOrderTraversal(node->left);
+        postOrderTraversal(node->right);
+        std::cout<< node->getValue() << ", ";
+    }
+
     //inserts a node inside the tree
     template<typename T> void AVLTree<T>::add(T value) {
         //if root node isn't instantiated it instantiates it
@@ -442,7 +486,7 @@ namespace DSA {
     //NODE
     //CONSTRUCTOR
     template<typename T> AVLTree<T>::Node::Node(T value) {
-        this->value = value;
+        setValue(value);
         this->height = 1;
         this->left = nullptr;
         this->right = nullptr;
@@ -479,7 +523,7 @@ namespace DSA {
     //Pair<T> class definition
     //this class is used inside the class HashMap<T> and HashMap<T>::Bucket in which it rappresents
     //a key associated with a value
-    template<typename T> class Pair {
+    template<typename T> class Pair final {
         private:
             const std::string key;
             T value;
@@ -498,10 +542,10 @@ namespace DSA {
 
 
     //HashMap<T> class definition
-    template<typename T> class HashMap {
+    template<typename T> class HashMap final {
         private:
             //private inner class Bucket that can only be used inside HashMap<T> class
-            class Bucket {
+            class Bucket final {
                 private:
                     std::list<Pair<T>> bucket;
 
@@ -624,7 +668,7 @@ namespace DSA {
         return hashTable[hashValue].exist(key);
     }
 
-    //returns the std::string rappresenting the hash map
+    //returns the std::string represents the hash map
     template<typename T> std::string HashMap<T>::toString() {
         std::string stringFormat = "{\n";
 
@@ -768,7 +812,7 @@ namespace DSA {
     //PAIR
     //CONSTRUCTOR
     template<typename T> Pair<T>::Pair(std::string key, T value): key(key) {
-        this->value = value;
+        setValue(value);
     }
 
     //CONSTRUCTOR
@@ -797,11 +841,11 @@ namespace DSA {
         }
         catch(...) {
             try {
-                std::cout<< "An error occurred while trying to assign the value of " << value << " to HashMap<T>::Bucket::Pair::value.\n";
-                std::cout<< "The value of HashMap<T>::Bucket::Pair::value remains unchanged (HashMap<T>::Bucket::Pair::value = " << this->value << ")."; 
+                std::cout<< "An error occurred while trying to assign the value of " << value << " to Pair<T>::value.\n";
+                std::cout<< "The value of Pair<T>::value remains unchanged (Pair<T>::value = " << this->value << ")."; 
             }
             catch(...) {
-                std::cout<< "Cannot assign the value to HashMap<T>::Bucket::Pair::value or print out the value you're trying to assign and the value of HashMap<T>::Bucket::Pair::value.";
+                std::cout<< "Cannot assign the value to Pair<T>::value or print out the value you're trying to assign and the value of Pair<T>::value.";
             }
         }
     }
@@ -818,5 +862,362 @@ namespace DSA {
     
     
     
+    #pragma endregion
+
+    #pragma region LINKEDLIST
+
+    template<typename T> class List final {
+        private: 
+            class Node final {
+                private:
+                    T value;
+
+
+                public:
+                    Node* next;
+                    Node* prev;
+                
+
+                    T& getValue(void) noexcept;
+                    void setValue(T);
+
+
+
+                    Node(T);
+            };
+
+            Node* head;
+            int length;
+
+
+
+        public:
+            void add(T);
+            void add(T, int);
+            void remove(void);
+            void remove(int);
+            T& operator[](int);
+            int getLength(void) const noexcept;
+            std::string toString(void);
+            std::string toString(Modality::Verse);
+            
+
+            List(void);
+            List(List<T>&) = delete;
+            List(List<T>&&) = delete;
+    };
+
+
+
+
+
+
+
+
+
+    //LIST
+    //CONSTRUCTOR
+    template<typename T> List<T>::List() {
+        this->head = nullptr;
+        this->length = 0;
+    }
+
+
+
+    //METHODS
+    //inserts a node at the end of the list
+    template<typename T> void List<T>::add(T value) {
+        if(!head) {
+            head = new Node(value);
+            head->next = head;
+            head->prev = head;
+
+            length++;
+            return;
+        }
+
+
+        Node* node = head;
+        for(int i = 0; i < length - 1; i++) node = node->next;
+        
+        
+        node->next = new Node(value);
+        node->next->prev = node;
+        node->next->next = head;
+        head->prev = node->next;
+
+        length++;
+    }
+
+    //inserts a node at an index in the list
+    template<typename T> void List<T>::add(T value, int index) {
+        if(!head) {
+            head = new Node(value);
+            head->next = head;
+            head->prev = head;
+
+            length++;
+            return;
+        }
+
+        if (index == 0) {
+            insertIndexIsEqualToZero:
+
+            Node* t = head->prev;
+            head->prev = new Node(value);
+            t->next = head->prev;
+            head->prev->next = head;
+            head->prev->prev = t;
+            head = head->prev;
+
+
+            length++;
+            return;
+        }
+
+        if(index == length) {
+            this->add(value);
+            return;
+        }
+
+
+        Node* parent = head;
+
+
+        if(index > 0) {
+            for(int i = 0; i < index - 1; i++) parent = parent->next;
+
+            if(parent->next == head) goto insertIndexIsEqualToZero;
+
+
+
+            Node* t = parent->next;
+            parent->next = new Node(value);
+            parent->next->prev = parent;
+            parent->next->next = t;
+            t->prev = parent->next;
+        }
+        else {
+            for(int i = 0; i > index + 1; i--) parent = parent->prev;
+
+            if(parent->prev == head) goto insertIndexIsEqualToZero;
+
+
+            Node* t = parent->prev;
+            parent->prev = new Node(value);
+            parent->prev->next = parent;
+            parent->prev->prev = t;
+            t->next = parent->prev;
+        }
+
+        length++;
+    }
+
+    //returns the number of element in the list
+    template<typename T> int List<T>::getLength() const noexcept {
+        return this->length;
+    }
+
+    //returns a string representing the list forward
+    template<typename T> std::string List<T>::toString() {
+        Node* node = head;
+        std::string string = "[";
+
+        
+        for(int i = 0; i < length; i++) {
+            string += std::to_string(node->getValue()) + ((i == length - 1) ? "" : ", ");
+            node = node->next;
+        }
+        
+
+        string += "]";
+        return string;
+    }
+
+    //returns a string representing the list backwards
+    template<typename T> std::string List<T>::toString(Modality::Verse verse) {
+        std::string string = "[";
+        
+        
+        if(verse == Modality::forwords) {
+            Node* node = head;
+
+            for(int i = 0; i < length; i++) {
+                string += std::to_string(node->getValue()) + ((i == length - 1) ? "" : ", ");
+                node = node->next;
+            }
+        }
+        else {
+            Node* node = head->prev;
+
+            for(int i = length - 1; i > -1; i--) {
+                string += std::to_string(node->getValue()) + ((i == 0) ? "" : ", ");
+                node = node->prev;
+            }
+        }
+        
+
+        string += "]";
+        return string;
+    }
+
+    //removes the last element from the list
+    template<typename T> void List<T>::remove() {
+        if(!head) return;
+
+        if(length == 1) {
+            head = nullptr;
+            length--;
+            return;
+        }
+
+
+        //head is already the parent of the node to delete (head->prev is the node to delete)
+        Node* node = head->prev;
+        head->prev = node->prev;
+        head->prev->next = head;
+
+        node->next = nullptr;
+        node->prev = nullptr;
+
+        delete node;
+        length--;
+    }
+
+    //removes an element at the specified index of the list
+    template<typename T> void List<T>::remove(int index) {
+        if(!head) return;
+
+        if(length == 1) {
+            head = nullptr;
+            length--;
+            return;
+        }
+
+        if(index == 0) {
+            removeIndexIsEqualToZero:
+
+            Node* node = head;
+            head = head->next;
+            head->prev = node->prev;
+            node->prev->next = head;
+
+            node->prev = nullptr;
+            node->next = nullptr;
+            delete node;
+
+            length--;
+            return;
+        }
+
+
+        Node* parent = head;
+        int i = 0;
+        if(index > 0) {
+            for(; i < index - 1; i++) parent = parent->next;
+
+            if(parent->next == head) goto removeIndexIsEqualToZero;
+
+
+
+            Node* node = parent->next;
+            parent->next = node->next;
+            node->next->prev = parent;
+
+            node->next = nullptr;
+            node->prev = nullptr;
+            delete node;
+        }
+        else {
+            for(int i = 0; i > index + 1; i--) parent = parent->prev;
+
+            if(parent->prev == head) goto indexIsEqualToZero;
+
+
+
+            Node* node = parent->prev;
+            parent->prev = node->prev;
+            node->prev->next = parent;
+
+            node->next = nullptr;
+            node->prev = nullptr;
+            delete node;
+        }
+
+        length--;
+    }
+
+    //returns the reference to the value of a node
+    template<typename T> T& List<T>::operator[](int index) {
+        Node* node = head;
+
+        if(index > 0) {
+            for(int i = 0; i < index; i++) node = node->next;
+
+            return node->getValue();
+        }
+        else if(index < 0) {
+            for(int i = 0; i > index; i--) node = node->prev;
+        
+            return node->getValue();
+        }
+        else {
+            return head->getValue();
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //NODE
+    //CONSTRUCTOR
+    template<typename T> List<T>::Node::Node(T value) {
+        setValue(value);
+        this->prev = nullptr;
+        this->next = nullptr;
+    }
+
+
+
+
+
+
+    //METHODS
+    //sets the value of the node
+    template<typename T> void List<T>::Node::setValue(T value) {
+        try {
+            this->value = value;
+        }
+        catch(...) {
+            try {
+                std::cout<< "An error occurred while trying to assign the value of " << value << " to List<T>::Node::value.\n";
+                std::cout<< "The value of List<T>::Node::value remains unchanged (List<T>::Node::value = " << this->value << ")."; 
+            }
+            catch(...) {
+                std::cout<< "Cannot assign the value to List<T>::Node::value or print out the value you're trying to assign and the value of List<T>::Node::value.";
+            }
+        }    
+    }
+
+    //returns the reference of the value of the node
+    template<typename T> T& List<T>::Node::getValue() noexcept {
+        return this->value;
+    }
+
+
+
+
+
     #pragma endregion
 }
