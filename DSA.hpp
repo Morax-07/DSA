@@ -13,8 +13,10 @@
 
 namespace DSA {
     namespace Modality {
-        enum Verse {forwords, backwards};
+        enum Verse {forwords = 1, backwards = -1};
         enum Traverse {inOrder, preOrder, postOrder};
+        enum Direction {topToBottom, bottomToTop};
+        enum Association {keyValue, valueKey};
     }
 
 
@@ -194,12 +196,19 @@ namespace DSA {
 
             case Modality::Traverse::postOrder:
                 postOrderTraversal(root);
+                break;
+
+            default:
+                break;
         }
+
+        std::cout<< "\n";
     }
 
     //public method to execute an in-order traversal from root node
     template<typename T> void AVLTree<T>::traverse() {
         inOrderTraversal(root);
+        std::cout<< "\n";
     }
     
     //executes a recursive in-order traversal in the tree starting from a node
@@ -514,8 +523,10 @@ namespace DSA {
 
     #pragma region LINKEDLIST
 
+    //List<T> class definition
     template<typename T> class List final {
         private: 
+            //inner Node<T> class defined as private to avoid external access
             class Node final {
                 private:
                     T value;
@@ -551,6 +562,7 @@ namespace DSA {
             
 
             List(void);
+            ~List(void);
     };
 
 
@@ -568,6 +580,10 @@ namespace DSA {
         this->length = 0;
     }
 
+    //DESTRUCTOR
+    template<typename T> List<T>::~List() {
+        while(length > 0) remove();
+    }
 
 
     //METHODS
@@ -682,29 +698,22 @@ namespace DSA {
 
     //returns a string representing the list backwards
     template<typename T> std::string List<T>::toString(Modality::Verse verse) {
-        std::string string = "[";
-        
-        
-        if(verse == Modality::forwords) {
-            Node* node = head;
-
-            for(int i = 0; i < length; i++) {
-                string += std::to_string(node->getValue()) + ((i == length - 1) ? "" : ", ");
-                node = node->next;
-            }
+        if(verse == Modality::Verse::forwords) {
+            return this->toString();
         }
         else {
+            std::string string = "[";
             Node* node = head->prev;
 
             for(int i = length - 1; i > -1; i--) {
                 string += std::to_string(node->getValue()) + ((i == 0) ? "" : ", ");
                 node = node->prev;
             }
-        }
-        
 
-        string += "]";
-        return string;
+
+            string += "]";
+            return string;
+        }
     }
 
     //removes the last element from the list
@@ -872,6 +881,7 @@ namespace DSA {
             T& getValue(void) noexcept;
             void setValue(T);
             std::string toString();
+            std::string toString(Modality::Association);
 
 
             Pair(void) = delete;
@@ -894,6 +904,7 @@ namespace DSA {
                     T& operator[](std::string&);
                     bool exist(std::string&);
                     std::string toString(void);
+                    std::string toString(Modality::Association);
                     std::vector<Pair<T>*> getPairs(void);
 
 
@@ -919,6 +930,7 @@ namespace DSA {
             T& operator[](std::string);
             bool exist(std::string);
             std::string toString(void);
+            std::string toString(Modality::Association);
             std::vector<std::string> getKeys(void);
             std::vector<Pair<T>*> getPairs(void);
 
@@ -999,7 +1011,7 @@ namespace DSA {
         return hashTable[hashValue].exist(key);
     }
 
-    //returns the std::string represents the hash map
+    //returns the std::string represents the hash map with the association key: value
     template<typename T> std::string HashMap<T>::toString() {
         std::string stringFormat = "{\n";
 
@@ -1009,6 +1021,22 @@ namespace DSA {
         stringFormat += "}\n";
 
         return stringFormat;
+    }
+
+    //returns the string representing the hash map with the specified association
+    template<typename T> std::string HashMap<T>::toString(Modality::Association association) {
+        if(association == Modality::Association::keyValue) {
+            return this->toString();
+        }
+        else {
+            std::string stringFormat = "{\n";
+
+            for(auto& bucket : hashTable) stringFormat += bucket.toString(association);
+
+
+            stringFormat += "\n}";
+            return stringFormat;
+        }
     }
 
     //returns a vector of the keys of the hash map
@@ -1105,7 +1133,7 @@ namespace DSA {
         return false;
     }
 
-    //returns the string rappresenting the bucket
+    //returns the string representing the bucket with the key: value association
     template<typename T> std::string HashMap<T>::Bucket::toString() {
         if(bucket.getLength() == 0) return "";
 
@@ -1115,6 +1143,23 @@ namespace DSA {
         for(int i = 0; i < bucket.getLength(); i++) stringFormat += bucket[i].toString();
 
         return stringFormat;
+    }
+
+    //returns the string representing the bucket with the specified association
+    template<typename T> std::string HashMap<T>::Bucket::toString(Modality::Association association) {
+        if(bucket.getLength() == 0) return "";
+
+
+        if(association == Modality::Association::keyValue) {
+            return this->toString();
+        }
+        else {
+            std::string stringFormat = "";
+
+            for(int i = 0; i < bucket.getLength(); i++) stringFormat += bucket[i].toString(association);
+    
+            return stringFormat;
+        }
     }
 
     //returns the reference of all the pairs in the bucket
@@ -1165,7 +1210,7 @@ namespace DSA {
         }
     }
 
-    //returns the string rappresenting a pair
+    //returns the string representing a pair with the key: value association
     template<typename T> std::string Pair<T>::toString() {
         try {
             return "\t{\"" + this->key + "\": " + std::to_string(this->value) + "}\n";
@@ -1174,6 +1219,182 @@ namespace DSA {
             return "It's impossible to display a string format of this HashMap<T> because of the type of it's value";
         }
     }
+
+    //returns the string representing a pair with the specified association
+    template<typename T> std::string Pair<T>::toString(Modality::Association association) {
+        if(association == Modality::Association::keyValue) {
+            return this->toString();
+        }
+        else {
+            try {
+                return "\t{\"" + std::to_string(this->value) + "\": " + this->key + "}\n";
+            }
+            catch(...) {
+                return "It's impossible to display a string format of this HashMap<T> because of the type of it's value";
+            }
+        }
+    }
     
+    #pragma endregion
+
+    #pragma region STACK
+    //Stack<T> class definition
+    //it manipulates a List<T> object to make it work like a stack
+    template<typename T> class Stack final {
+        private:
+            List<T> list;
+
+        public:
+            void push(T);
+            void pop(void);
+            T& top(void);
+            int getLength(void) const noexcept;
+            bool isEmpty(void) const noexcept;
+            std::string toString(void);
+            std::string toString(Modality::Direction);
+    };
+
+
+
+
+
+
+
+
+    //METHODS
+    //add an element on top of the stack
+    template<typename T> void Stack<T>::push(T value) {
+        list.add(value);
+    }
+
+    //pops the top element of the stack
+    template<typename T> void Stack<T>::pop() {
+        list.remove();
+    }
+
+    //retuns the reference to the top element of the stack
+    template<typename T> T& Stack<T>::top() {
+        return list[list.getLength() - 1];
+    }
+
+    //retuns the number of elements in the stack
+    template<typename T> int Stack<T>::getLength() const noexcept {
+        return list.getLength();
+    }
+
+    //returns if the stack is empty or not
+    template<typename T> bool Stack<T>::isEmpty() const noexcept {
+        return (list.getLength() != 0) ? false : true;
+    }
+
+    //returns a string representing the stack from top to bottom
+    template<typename T> std::string Stack<T>::toString() {
+        std::string stack = "________\n";
+
+        try {
+            for(int i = -1; i > -list.getLength() - 1; i--) 
+                stack += std::to_string(list[i]) + "\n";
+        }
+        catch(...) {
+            std::cerr<< "The value you're trying to represent can't be converted into a string!";
+        }
+        
+    
+        
+        return stack;
+    }
+
+    //returns a string representing the stack in a specified direction
+    template<typename T> std::string Stack<T>::toString(Modality::Direction direction) {
+        try {
+            if(direction == Modality::Direction::topToBottom) {
+                return this->toString();
+            }
+            else {
+                std::string stack = "________\n";
+
+
+                for(int i = 0; i < list.getLength(); i++) 
+                    stack += std::to_string(list[i]) + "\n";
+
+
+                return stack;
+            }
+        }
+        catch(...) {
+            std::cerr<< "The value you're trying to represent can't be converted into a string!";
+            return "";
+        }
+    }
+
+
+
+
+    #pragma endregion
+
+    #pragma region QUEUE
+
+    //Queue<T> class definition
+    //manululates a List<T> object to make it work like a queue
+    template<typename T> class Queue final {
+        private:
+            List<T> list;
+
+        
+        public:
+            void enqueue(T);
+            void dequeue(void);
+            T& head(void);
+            int getLength(void) const noexcept;
+            bool isEmpty(void) const noexcept;
+            std::string toString(void);
+            std::string toString(Modality::Verse);
+    };
+
+
+
+
+
+
+
+
+
+    //METHODS
+    //adds an element to the top of the queue
+    template<typename T> void Queue<T>::enqueue(T value) {
+        list.add(value, list.getLength());
+    }
+
+    //removes the element at the bottom of the queue
+    template<typename T> void Queue<T>::dequeue() {
+        list.remove(0);
+    }
+
+    //returns the reference of the element at the head of the queue
+    template<typename T> T& Queue<T>::head() {
+        return list[0];
+    }
+
+    //returns the number of elements of the queue
+    template<typename T> int Queue<T>::getLength() const noexcept {
+        return list.getLength();
+    }
+
+    //returns if the queue is empty or not
+    template<typename T> bool Queue<T>::isEmpty() const noexcept {
+        return (list.getLength() != 0) ? false : true;
+    }
+
+    //returns a string representing the queue with a forword verse
+    template<typename T> std::string Queue<T>::toString() {
+        return list.toString(Modality::Verse::backwards);
+    }
+
+    //returns a string representing the queue with the specified verse
+    template<typename T> std::string Queue<T>::toString(Modality::Verse verse) {
+        return list.toString((Modality::Verse)-verse);
+    }
+
+
     #pragma endregion
 }
